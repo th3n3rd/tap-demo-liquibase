@@ -19,3 +19,10 @@ spec:
       url: https://github.com/th3n3rd/tap-demo-liquibase.git
       ref:
         branch: main
+  serviceClaims:
+    - name: db
+      ref:
+        apiVersion: services.apps.tanzu.vmware.com/v1alpha1
+        kind: ClassClaim
+        name: tap-demo-liquibase-db
+
