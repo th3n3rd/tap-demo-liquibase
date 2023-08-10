@@ -19,6 +19,9 @@ spec:
       url: https://github.com/th3n3rd/tap-demo-liquibase.git
       ref:
         branch: main
+  env:
+    - name: spring.liquibase.enabled
+      value: "false"
   serviceClaims:
     - name: db
       ref:
