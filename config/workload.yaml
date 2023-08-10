@@ -6,6 +6,10 @@ metadata:
     app.kubernetes.io/part-of: tap-demo-liquibase
     apps.tanzu.vmware.com/workload-type: web
 spec:
+  build:
+    env:
+      - name: BP_JVM_VERSION
+        value: "17"
   source:
     git:
       url: https://github.com/th3n3rd/tap-demo-liquibase.git
