@@ -4,6 +4,7 @@ metadata:
   name: tap-demo-liquibase
   labels:
     app.kubernetes.io/part-of: tap-demo-liquibase
+    apps.tanzu.vmware.com/has-db-migrations: "true"
     apps.tanzu.vmware.com/workload-type: web
 spec:
   build:
