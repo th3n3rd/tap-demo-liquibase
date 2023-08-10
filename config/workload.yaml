@@ -8,6 +8,6 @@ metadata:
 spec:
   source:
     git:
-      url: git@github.com:th3n3rd/tap-demo-liquibase.git
+      url: https://github.com/th3n3rd/tap-demo-liquibase.git
       ref:
         branch: main
