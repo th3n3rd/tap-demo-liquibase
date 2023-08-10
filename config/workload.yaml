@@ -10,6 +10,10 @@ spec:
     env:
       - name: BP_JVM_VERSION
         value: "17"
+  params:
+    - name: annotations
+      value:
+        autoscaling.knative.dev/min-scale: "1"
   source:
     git:
       url: https://github.com/th3n3rd/tap-demo-liquibase.git
