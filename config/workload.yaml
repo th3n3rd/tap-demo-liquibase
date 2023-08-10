@@ -1,0 +1,13 @@
+apiVersion: carto.run/v1alpha1
+kind: Workload
+metadata:
+  name: tap-demo-liquibase
+  labels:
+    app.kubernetes.io/part-of: tap-demo-liquibase
+    apps.tanzu.vmware.com/workload-type: web
+spec:
+  source:
+    git:
+      url: git@github.com:th3n3rd/tap-demo-liquibase.git
+      ref:
+        branch: main
