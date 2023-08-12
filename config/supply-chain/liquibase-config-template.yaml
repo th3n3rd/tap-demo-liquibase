@@ -1,0 +1,54 @@
+apiVersion: carto.run/v1alpha1
+kind: ClusterConfigTemplate
+metadata:
+  name: liquibase-config-template
+spec:
+  configPath: '.data'
+  healthRule:
+    alwaysHealthy: {}
+  lifecycle: mutable
+  ytt: |
+    #@ load("@ytt:data", "data")
+    #@ load("@ytt:base64", "base64")
+    #@ load("@ytt:yaml", "yaml")
+    #@ load("@ytt:struct", "struct")
+    
+    #@ db_migrations_data = yaml.decode(base64.decode(data.values.configs.db_migrations.config))
+    
+    #@ def merge_labels(fixed_values):
+    #@   labels = {}
+    #@   if hasattr(data.values.workload.metadata, "labels"):
+    #@     labels.update(data.values.workload.metadata.labels)
+    #@   end
+    #@   labels.update(fixed_values)
+    #@   return labels
+    #@ end
+    
+    #@ def liquibase_configmap():
+    ---
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: #@ data.values.workload.metadata.name + "-liquibase-config"
+      labels: #@ merge_labels({ "app.kubernetes.io/component": "run", "carto.run/workload-name": data.values.workload.metadata.name })
+    data: #@ db_migrations_data
+    #@ end
+    
+    #@ def add_liquibase_config():
+    #@ if hasattr(data.values.workload.metadata, "labels") and hasattr(data.values.workload.metadata.labels, "apps.tanzu.vmware.com/has-db-migrations") and data.values.workload.metadata.labels["apps.tanzu.vmware.com/has-db-migrations"] == "true":
+    #@    new_data = struct.decode(data.values.configs.app_def.config)
+    #@    new_data.update({"liquibase-config": yaml.encode(liquibase_configmap())})
+    #@    return new_data
+    #@ else:
+    #@    return struct.decode(data.values.configs.app_def.config)
+    #@ end
+    #@ end
+
+    ---
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: #@ data.values.workload.metadata.name + "-with-liquibase-config"
+      labels: #@ merge_labels({ "app.kubernetes.io/component": "liquibase-config" })
+    data: #@ add_liquibase_config()
+

@@ -1,0 +1,148 @@
+#@ load("@ytt:data", "data")
+---
+apiVersion: carto.run/v1alpha1
+kind: ClusterSupplyChain
+metadata:
+  name: source-db-migration-to-url
+spec:
+  params:
+  - name: maven_repository_url
+    value: https://repo.maven.apache.org/maven2
+  - default: ""
+    name: ca_cert_data
+  - default: main
+    name: gitops_branch
+  - default: supplychain
+    name: gitops_user_name
+  - default: supplychain
+    name: gitops_user_email
+  - default: supplychain@cluster.local
+    name: gitops_commit_message
+  - default: ""
+    name: gitops_ssh_secret
+  - default: ""
+    name: gitops_commit_branch
+  resources:
+  - name: source-provider
+    params:
+    - default: default
+      name: serviceAccount
+    - default: go-git
+      name: gitImplementation
+    templateRef:
+      kind: ClusterSourceTemplate
+      name: source-template
+  - name: image-provider
+    params:
+      - default: default
+        name: serviceAccount
+      - name: registry
+        value:
+          ca_cert_data: ""
+          repository: #@ data.values.registry.repository
+          server: #@ data.values.registry.server
+      - default: default
+        name: clusterBuilder
+      - default: ./Dockerfile
+        name: dockerfile
+      - default: ./
+        name: docker_build_context
+      - default: [ ]
+        name: docker_build_extra_args
+    sources:
+      - name: source
+        resource: source-provider
+    templateRef:
+      kind: ClusterImageTemplate
+      name: kpack-template
+  - name: config-provider
+    images:
+      - name: image
+        resource: image-provider
+    params:
+      - default: default
+        name: serviceAccount
+    templateRef:
+      kind: ClusterConfigTemplate
+      name: convention-template
+  - name: app-config
+    configs:
+      - name: config
+        resource: config-provider
+    templateRef:
+      kind: ClusterConfigTemplate
+      name: config-template
+  - name: service-bindings
+    configs:
+      - name: app_def
+        resource: app-config
+    templateRef:
+      kind: ClusterConfigTemplate
+      name: service-bindings
+  - name: api-descriptors
+    configs:
+      - name: app_def
+        resource: service-bindings
+    templateRef:
+      kind: ClusterConfigTemplate
+      name: api-descriptors
+  - name: db-migrations-provider #! this step won't show on the UI - :shrug
+    sources:
+      - name: source
+        resource: source-provider
+    params:
+      - default: default
+        name: serviceAccount
+    templateRef:
+      kind: ClusterConfigTemplate
+      name: liquibase-config-provider-template
+  - name: db-migrations
+    configs:
+      - name: app_def
+        resource: api-descriptors
+      - name: db_migrations
+        resource: db-migrations-provider
+    params:
+      - default: default
+        name: serviceAccount
+    templateRef:
+      kind: ClusterConfigTemplate
+      name: liquibase-config-template
+  - name: config-writer
+    configs:
+      - name: config
+        resource: db-migrations
+    params:
+      - default: default
+        name: serviceAccount
+      - name: registry
+        value:
+          ca_cert_data: ""
+          repository: #@ data.values.registry.repository
+          server: #@ data.values.registry.server
+    templateRef:
+      kind: ClusterTemplate
+      name: config-writer-template
+  - name: deliverable
+    params:
+      - name: registry
+        value:
+          ca_cert_data: ""
+          repository: #@ data.values.registry.repository
+          server: #@ data.values.registry.server
+      - default: go-git
+        name: gitImplementation
+    templateRef:
+      kind: ClusterTemplate
+      name: deliverable-template
+  selector:
+    apps.tanzu.vmware.com/has-db-migrations: "true"
+  selectorMatchExpressions:
+  - key: apps.tanzu.vmware.com/workload-type
+    operator: In
+    values:
+    - web
+    - server
+    - worker
+  - key: apps.tanzu.vmware.com/carvel-package-workflow
+    operator: DoesNotExist

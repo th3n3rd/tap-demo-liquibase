@@ -1,0 +1,28 @@
+apiVersion: tekton.dev/v1beta1
+kind: ClusterTask
+metadata:
+  name: liquibase-config-provider-task
+spec:
+  description: |-
+    A task that takes the liquibase migrations found in a given git repository and encoded them into a YAML and then base64.
+  params:
+    - name: source-url
+    - name: source-revision
+    - name: workload-name
+  steps:
+    - name: serialise-db-migrations
+      image: ghcr.io/vmware-tanzu/carvel-docker-image@sha256:5ab82a2ac0b983f5967b5ffc7d3503b4741ac808cd2c1cc6b4a42916f7ed1a47
+      script: |
+        #!/usr/bin/env bash
+        cd `mktemp -d`
+        wget -qO- $(params.source-url) | tar xvz -m
+        touch plain-config.yaml
+        for file in ./src/main/resources/db/changelog/*
+        do
+          echo "`basename $file`: |" >> plain-config.yaml
+          sed 's/^/    /' "$file" >> plain-config.yaml
+        done
+        cat plain-config.yaml | base64 > $(results.liquibase-config-base64.path)
+  results:
+    - name: liquibase-config-base64
+      description: base64-encoded YAML describing the liquibase database migrations

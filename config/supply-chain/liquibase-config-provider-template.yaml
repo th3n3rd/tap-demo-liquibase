@@ -1,0 +1,42 @@
+apiVersion: carto.run/v1alpha1
+kind: ClusterConfigTemplate
+metadata:
+  name: liquibase-config-provider-template
+spec:
+  configPath: '.status.outputs.results[?(@.name=="liquibase-config-base64")].value'
+  healthRule:
+    alwaysHealthy: {}
+  lifecycle: mutable
+  ytt: |
+    #@ load("@ytt:data", "data")
+    
+    #@ def merge_labels(fixed_values):
+    #@   labels = {}
+    #@   if hasattr(data.values.workload.metadata, "labels"):
+    #@     labels.update(data.values.workload.metadata.labels)
+    #@   end
+    #@   labels.update(fixed_values)
+    #@   return labels
+    #@ end
+    ---
+    apiVersion: carto.run/v1alpha1
+    kind: Runnable
+    metadata:
+      name: #@ data.values.workload.metadata.name + "-liquibase-config-provider"
+      labels: #@ merge_labels({ "app.kubernetes.io/component": "liquibase-config-provider" })
+    spec:
+      runTemplateRef:
+        name: tekton-results-taskrun
+        kind: ClusterRunTemplate
+      inputs:
+        params:
+          - name: source-url
+            value: #@ data.values.source.url
+          - name: source-revision
+            value: #@ data.values.source.revision
+          - name: workload-name
+            value: #@ data.values.workload.metadata.name
+        serviceAccount: #@ data.values.params.serviceAccount
+        taskRef:
+          kind: ClusterTask
+          name: "liquibase-config-provider-task"
