@@ -37,7 +37,7 @@ spec:
     #@ def add_liquibase_config():
     #@ if hasattr(data.values.workload.metadata, "labels") and hasattr(data.values.workload.metadata.labels, "apps.tanzu.vmware.com/has-db-migrations") and data.values.workload.metadata.labels["apps.tanzu.vmware.com/has-db-migrations"] == "true":
     #@    new_data = struct.decode(data.values.configs.app_def.config)
-    #@    new_data.update({"liquibase-config": yaml.encode(liquibase_configmap())})
+    #@    new_data.update({"liquibase-config.yml": yaml.encode(liquibase_configmap())})
     #@    return new_data
     #@ else:
     #@    return struct.decode(data.values.configs.app_def.config)

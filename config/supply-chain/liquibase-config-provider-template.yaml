@@ -5,7 +5,7 @@ metadata:
 spec:
   configPath: '.status.outputs.results[?(@.name=="liquibase-config-base64")].value'
   healthRule:
-    alwaysHealthy: {}
+    singleConditionType: Ready
   lifecycle: mutable
   ytt: |
     #@ load("@ytt:data", "data")
