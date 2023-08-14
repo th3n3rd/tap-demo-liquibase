@@ -64,7 +64,7 @@ spec:
         name: serviceAccount
     templateRef:
       kind: ClusterConfigTemplate
-      name: convention-template
+      name: enhanced-convention-template
   - name: app-config
     configs:
       - name: config
