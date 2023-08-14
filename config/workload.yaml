@@ -15,9 +15,21 @@ spec:
     - name: annotations
       value:
         autoscaling.knative.dev/min-scale: "1"
+    - name: gitops_server_address
+      value: ssh://git@github.com
+    - name: gitops_repository_owner
+      value: th3n3rd
+    - name: gitops_repository_name
+      value: tap-demo-liquibase-gitops
+    - name: gitops_branch
+      value: dev
+    - name: gitops_commit_message
+      value: "Update tap-demo-liquibase config"
+    - name: gitops_ssh_secret
+      value: tap-gitops-ssh-auth
   source:
     git:
-      url: https://github.com/th3n3rd/tap-demo-liquibase.git
+      url: ssh://git@github.com/th3n3rd/tap-demo-liquibase.git
       ref:
         branch: main
   env:
