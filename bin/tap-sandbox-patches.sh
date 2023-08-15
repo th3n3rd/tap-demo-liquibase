@@ -2,26 +2,9 @@
 
 set -e
 
-DEFAULT=$(tput sgr0)
-RED=$(tput setaf 1)
-GREEN=$(tput setaf 2)
-BLUE=$(tput setaf 4)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &> /dev/null && pwd)"
 
-function fail() {
-    exit 1
-}
-
-function info {
-    printf "$BLUE ℹ️  %s$DEFAULT\n" "$1"
-}
-
-function success {
-    printf "$GREEN ✅  %s$DEFAULT\n" "$1"
-}
-
-function error() {
-    printf "$RED ❌  %s$DEFAULT\n" "$1" 1>&2
-}
+source "$SCRIPT_DIR/utils.sh"
 
 POD_MAX_MEMORY=$(kubectl get clusterpolicy sandbox-namespace-limits -o yaml | yq '.spec.rules[1].generate.data.spec.limits[] | select(.type =="Pod") | .max.memory ' | tr -d '\n')
 if [ "$POD_MAX_MEMORY" != "2Gi" ]; then
