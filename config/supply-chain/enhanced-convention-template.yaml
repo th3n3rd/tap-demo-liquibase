@@ -71,7 +71,25 @@ spec:
           initContainers:
             - name: db-migrations
               image: liquibase/liquibase@sha256:402dd9d122a0ce1b5d6e165492c5d45d06694dc5be64c0d36fdb219f783d7551
-              command: ["ls", "-l", "/bindings/db"]
+              command: ["/bin/sh", "-c"]
+              args:
+              - |
+                set -e
+                cd `mktemp -d`
+                cp /liquibase-config/* .
+                echo "changeLogFile: ./db.changelog-master.yaml" >> ./liquibase.properties
+                echo "username: $(cat /bindings/db/username)" >> ./liquibase.properties
+                echo "password: $(cat /bindings/db/password)" >> ./liquibase.properties
+                echo "url: jdbc:$(cat /bindings/db/type)://$(cat /bindings/db/host):$(cat /bindings/db/port)/$(cat /bindings/db/database)" >> ./liquibase.properties
+                liquibase update --defaultsFile=$(pwd)/liquibase.properties
+              volumeMounts:
+                - name: liquibase-config
+                  mountPath: /liquibase-config
+                  readOnly: true
+          volumes:
+            - name: liquibase-config
+              configMap:
+                name: #@ data.values.workload.metadata.name + "-liquibase-config"
           #@ end
           containers:
             - name: workload
