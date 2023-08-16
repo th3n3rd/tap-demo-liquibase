@@ -42,7 +42,6 @@ if [ "$KNATIVE_INITCONTAINERS" != "enabled" ]; then
     kubectl get cm config-features -n knative-serving -o yaml \
         | yq '.data += { "kubernetes.podspec-init-containers": "enabled" }' \
         | kubectl apply -f -
-    fail
 else
     success "The Knative init containers feature flag is enabled"
 fi
