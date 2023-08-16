@@ -46,4 +46,26 @@ else
     success "The Knative init containers feature flag is enabled"
 fi
 
+TEKTON_RESULTS_FROM=$(kubectl get cm feature-flags -n tekton-pipelines -o yaml | yq '.data["results-from"]')
+if [ "$TEKTON_RESULTS_FROM" != "sidecar-logs" ]; then
+    error "The Tekton results sidecar should be enabled"
+    info "Patching the configuration map"
+    kubectl get cm feature-flags -n tekton-pipelines -o yaml \
+        | yq '.data += { "results-from": "sidecar-logs" }' \
+        | kubectl apply -f -
+else
+    success "The Tekton results sidecar-logs is enabled"
+fi
+
+TEKTON_RESULTS_SIZE=$(kubectl get cm feature-flags -n tekton-pipelines -o yaml | yq '.data["max-result-size"]')
+if [ "$TEKTON_RESULTS_SIZE" != "1048576" ]; then
+    error "The Tekton results sidecar should be set to 1048576 (e.g. 1MiB), instead was $TEKTON_RESULTS_SIZE"
+    info "Patching the configuration map"
+    kubectl get cm feature-flags -n tekton-pipelines -o yaml \
+        | yq '.data += { "max-result-size": "1048576" }' \
+        | kubectl apply -f -
+else
+    success "The Tekton max results size is configured to 1048576 (e.g. 1MiB)"
+fi
+
 echo "Everything is ready! You can now setup the supply chain and workload"
