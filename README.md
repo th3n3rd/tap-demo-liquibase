@@ -36,6 +36,12 @@ In order to support data flowing from Tekton to the Supply Chain, we created a r
 
 The custom supply chain will be activated if the workload contains the label `apps.tanzu.vmware.com/has-db-migrations: "true"`.
 
+## TODOs
+
+[] Replace the hardcoded bits used to for the db migrations (paths, secret names, etc) to be parameters provided in the workload
+[] Suppose the credentials for running the DDLs are separate from the credentials used in the app
+[] Generalise to support other schema migrations tools such as Flyway
+
 ## Caveats
 
 A single `ConfigmMap` has a size limit of `1MB`, which does include the whole resource definition and is not limited to the data field.
