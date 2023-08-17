@@ -27,6 +27,8 @@ spec:
       value: "Update tap-demo-liquibase config"
     - name: gitops_ssh_secret
       value: tap-gitops-ssh-auth
+    - name: db_migrations_path
+      value: ./src/main/resources/db/changelog/*
   source:
     git:
       url: ssh://git@github.com/th3n3rd/tap-demo-liquibase.git

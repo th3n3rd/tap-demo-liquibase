@@ -36,6 +36,8 @@ spec:
             value: #@ data.values.source.revision
           - name: workload-name
             value: #@ data.values.workload.metadata.name
+          - name: db-migrations-path
+            value: #@ data.values.params.db_migrations_path
         serviceAccount: #@ data.values.params.serviceAccount
         taskRef:
           kind: ClusterTask

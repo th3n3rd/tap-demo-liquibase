@@ -9,6 +9,7 @@ spec:
     - name: source-url
     - name: source-revision
     - name: workload-name
+    - name: db-migrations-path
   steps:
     - name: serialise-db-migrations
       image: ghcr.io/vmware-tanzu/carvel-docker-image@sha256:5ab82a2ac0b983f5967b5ffc7d3503b4741ac808cd2c1cc6b4a42916f7ed1a47
@@ -17,7 +18,7 @@ spec:
         cd `mktemp -d`
         wget -qO- $(params.source-url) | tar xvz -m
         touch plain-config.yaml
-        for file in ./src/main/resources/db/changelog/*
+        for file in $(params.db-migrations-path)
         do
           echo "`basename $file`: |" >> plain-config.yaml
           sed 's/^/    /' "$file" >> plain-config.yaml

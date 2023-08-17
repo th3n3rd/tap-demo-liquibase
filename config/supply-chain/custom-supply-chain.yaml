@@ -93,6 +93,8 @@ spec:
     params:
       - default: default
         name: serviceAccount
+      - default: ./liquibase/changelog
+        name: db_migrations_path
     templateRef:
       kind: ClusterConfigTemplate
       name: liquibase-config-provider-template
