@@ -19,7 +19,7 @@ fi
 
 if ! kubectl get secret tap-gitops-ssh-auth &> /dev/null; then
     error "The gitops secret should exist"
-    info "Manual fix: create a kubernetes secret named 'tap-gitops-ssh-auth' for git authentication over SSH, following the specs here https://docs.vmware.com/en/VMware-Tanzu-Application-Platform/1.6/tap/scc-git-auth.html#sh"
+    info "Manual fix: create a kubernetes secret named 'tap-gitops-ssh-auth' for git authentication over SSH, following the specs here https://docs.vmware.com/en/VMware-Tanzu-Application-Platform/1.6/tap/scc-git-auth.html#ssh-2"
     fail
 else
     success "The gitops secret exists"
@@ -59,13 +59,13 @@ fi
 
 TEKTON_RESULTS_SIZE=$(kubectl get cm feature-flags -n tekton-pipelines -o yaml | yq '.data["max-result-size"]')
 if [ "$TEKTON_RESULTS_SIZE" != "1048576" ]; then
-    error "The Tekton results sidecar should be set to 1048576 (e.g. 1MiB), instead was $TEKTON_RESULTS_SIZE"
+    error "The Tekton results sidecar should be set to 1048576 (i.e. 1MiB), instead was $TEKTON_RESULTS_SIZE"
     info "Patching the configuration map"
     kubectl get cm feature-flags -n tekton-pipelines -o yaml \
         | yq '.data += { "max-result-size": "1048576" }' \
         | kubectl apply -f -
 else
-    success "The Tekton max results size is configured to 1048576 (e.g. 1MiB)"
+    success "The Tekton max results size is configured to 1048576 (i.e. 1MiB)"
 fi
 
 echo "Everything is ready! You can now setup the supply chain and workload"
