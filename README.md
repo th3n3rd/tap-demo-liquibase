@@ -62,7 +62,7 @@ Updating that value to `2Gi` fixes the problem (remmeber that `2Gi` ~ `2147MB` >
 The rule of thumb for setting limits is the following:
     * For setting a `min` value use power of 10 units such as KB, MB, GB, TB, etc (the B, as in bytes, is optional)
     * For setting a `max` value use power of 2 units such as KiB, MiB, GiB, TiB, etc (the B, as in bytes, is optional)
-    * Remember that 1KB = $10^3$ bytes = 1000 bytes, 1KiB = $2^10$ bytes = 1024 bytes
+    * Remember that 1KB = $10^3$ bytes = 1000 bytes, 1KiB = $2^{10}$ bytes = 1024 bytes
 
 * The default service account is controlled by the [TAP namespace provisioner](https://docs.vmware.com/en/VMware-Tanzu-Application-Platform/1.6/tap/namespace-provisioner-use-case4.html), which means that in order to associate the gitops secret
 to the service account we would need to either:
