@@ -22,15 +22,19 @@ Typically TAP comes with a basic out-of-the-box (OOTB) supply chain, namely `sou
 In order to experiment with a custom supply chain[^1], we started from a copy of the  `source-to-url` and applied the following
 changes:
 
-* The `config-provider` step, which defines the Knative serving manifest for the workload, has been re-configured to use a new template, namely `enhanced-convention-template`
-    * This new `ClusterConfigTemplate` is an enhanced version of the `convention-template`, it prepends an `initContainer` that will run the database migration ar runtime, with the following assumptions:
-        * A service binding exists with the name `db`, containing the credentials to access the database with the ability to execute DDLs
-        * A config map exists with the name `<workload-name>-liquibase-config`, containing the migration changelog and database migrations to apply
+* The `app-config` step, which defines the Knative serving manifest for the workload, has been re-configured to use a new template, namely `enhanced-web-config-template`
+    * This new `ClusterConfigTemplate` is a copy of the `config-template` and it just adds an `kapp` annotation ot he Knative service created
+      so to ensure we can apply a certain order to the manifest applied by `kapp` at delivery time.
 * A new step named `db-migrations-provider`, configured to use a new template `liquibase-config-provider-template`
     * It leverages a tekton `ClusterTask`, namely `liquibase-config-provider-task`, in order to encode the database migrations from the source code into YAML
 * A new step name `db-migrations`, configured to use a new template `liquibase-config-template`
-    * It receives the config from the `api-descriptors` step and append a new entry containing the `ConfigMap` of all the database migrations received by the `db-migration-provider` step
-    * The output of this template is then used by the `config-provider` step in order to generate the GitOps configuration to apply at deploy time.
+    * It receives the config from the `api-descriptors` step and append a new entry containing few resources:
+        * a `ConfigMap` of all the database migrations received by the `db-migration-provider` step
+        * one or more `ServiceBinding` (starting from the serviceClaims applied to the workload, for now)
+        * a `Job` that will run the database migration ar runtime, with the following assumptions:
+            * A service binding exists with the name `db`, containing the credentials to access the database with the ability to execute DDLs
+            * A config map exists with the name `<workload-name>-liquibase-config`, containing the migration changelog and database migrations to apply
+    * The output of this template is then used by the `config-provider` step in order to generate the GitOps configuration to apply at delivery time.
 
 In order to support data flowing from Tekton to the Supply Chain, we created a reusable `ClusterRunTemplate`, namely `tekton-results-taskrun`, which can be used by any `Runnable` in order to to expose any results coming from a tekton `Task`.
 
@@ -38,9 +42,11 @@ The custom supply chain will be activated if the workload contains the label `ap
 
 ## TODOs
 
-[] Replace the hardcoded bits used to for the db migrations (paths, secret names, etc) to be parameters provided in the workload
-[] Suppose the credentials for running the DDLs are separate from the credentials used in the app
-[] Generalise to support other schema migrations tools such as Flyway
+[x] Replace the initContainer strategy with a standalone Job that runs before the application is deployed
+[ ] Specify a different service claim for running the db migrations (e.g. to simulate a different set of credentials for the db-migration job)
+[ ] Replace the hardcoded bits used to for the db migrations (paths, service-binding names, config-map names, etc) to be parameters provided in the workload
+[ ] Suppose the credentials for running the DDLs are separate from the credentials used in the app
+[ ] Generalise to support other schema migrations tools such as Flyway
 
 ## Caveats
 
@@ -74,8 +80,6 @@ The rule of thumb for setting limits is the following:
 to the service account we would need to either:
     * apply an updated version of the tap values used for installation
     * use carefully crafted [annotations](https://docs.vmware.com/en/VMware-Tanzu-Application-Platform/1.6/tap/namespace-provisioner-parameters.html#namespace-parameters) on the namespace (we opted for this one)
-
-* Knative comes with init containers disabled by default, so we had to update a specific config map in order to enable the feature flag.
 
 * Tekton comes with a limitation on the results size of a `Task`, which is around 4KB (in total for a single Task), which is quite a limitation.
 But it does support larger results by [enabling a specific feature flag](https://tekton.dev/docs/installation/additional-configs/#enabling-larger-results-using-sidecar-logs), and will also require to change the max size in the same configuration.

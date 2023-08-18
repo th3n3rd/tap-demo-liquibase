@@ -64,14 +64,14 @@ spec:
         name: serviceAccount
     templateRef:
       kind: ClusterConfigTemplate
-      name: enhanced-convention-template
+      name: convention-template
   - name: app-config
     configs:
       - name: config
         resource: config-provider
     templateRef:
       kind: ClusterConfigTemplate
-      name: config-template
+      name: enhanced-web-config-template
   - name: service-bindings
     configs:
       - name: app_def

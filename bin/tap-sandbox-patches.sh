@@ -35,17 +35,6 @@ else
     success "The gitops secret is associated with the default service account"
 fi
 
-KNATIVE_INITCONTAINERS=$(kubectl get cm config-features -n knative-serving -o yaml | yq '.data["kubernetes.podspec-init-containers"]')
-if [ "$KNATIVE_INITCONTAINERS" != "enabled" ]; then
-    error "The Knative init containers feature flag should be enabled, instead was $KNATIVE_INITCONTAINERS"
-    info "Patching the configuration map"
-    kubectl get cm config-features -n knative-serving -o yaml \
-        | yq '.data += { "kubernetes.podspec-init-containers": "enabled" }' \
-        | kubectl apply -f -
-else
-    success "The Knative init containers feature flag is enabled"
-fi
-
 TEKTON_RESULTS_FROM=$(kubectl get cm feature-flags -n tekton-pipelines -o yaml | yq '.data["results-from"]')
 if [ "$TEKTON_RESULTS_FROM" != "sidecar-logs" ]; then
     error "The Tekton results sidecar should be enabled"
