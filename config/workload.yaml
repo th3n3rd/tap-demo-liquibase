@@ -29,6 +29,8 @@ spec:
       value: tap-gitops-ssh-auth
     - name: db_migrations_path
       value: ./src/main/resources/db/changelog/*
+    - name: db_migrations_service_claim_name
+      value: db-migrations
   source:
     git:
       url: ssh://git@github.com/th3n3rd/tap-demo-liquibase.git
@@ -43,4 +45,8 @@ spec:
         apiVersion: services.apps.tanzu.vmware.com/v1alpha1
         kind: ClassClaim
         name: tap-demo-liquibase-db
-
+    - name: db-migrations
+      ref:
+        apiVersion: services.apps.tanzu.vmware.com/v1alpha1
+        kind: ClassClaim
+        name: tap-demo-liquibase-db

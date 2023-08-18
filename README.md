@@ -43,9 +43,10 @@ The custom supply chain will be activated if the workload contains the label `ap
 ## TODOs
 
 [x] Replace the initContainer strategy with a standalone Job that runs before the application is deployed
-[ ] Specify a different service claim for running the db migrations (e.g. to simulate a different set of credentials for the db-migration job)
-[ ] Replace the hardcoded bits used to for the db migrations (paths, service-binding names, config-map names, etc) to be parameters provided in the workload
-[ ] Suppose the credentials for running the DDLs are separate from the credentials used in the app
+[x] Specify a different service claim for running the db migrations (e.g. to simulate a different set of credentials for the db-migration job)
+[x] Replace the hardcoded bits used to for the db migrations to be parameters provided in the workload:
+    [x] database migrations path
+    [x] service-binding/claim name
 [ ] Generalise to support other schema migrations tools such as Flyway
 
 ## Caveats

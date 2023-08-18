@@ -107,6 +107,8 @@ spec:
     params:
       - default: default
         name: serviceAccount
+      - default: db
+        name: db_migrations_service_claim_name
     templateRef:
       kind: ClusterConfigTemplate
       name: liquibase-config-template

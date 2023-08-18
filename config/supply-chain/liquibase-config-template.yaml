@@ -52,21 +52,23 @@ spec:
       name: #@ data.values.workload.metadata.name + "-liquibase-config"
       labels: #@ merge_labels({ "app.kubernetes.io/component": "db-migrations", "carto.run/workload-name": data.values.workload.metadata.name })
     data: #@ db_migrations_data
-    #@ for service in data.values.workload.spec.serviceClaims:
+    #@ for service_claim in data.values.workload.spec.serviceClaims:
+    #@ if service_claim.name == param("db_migrations_service_claim_name"):
     ---
     apiVersion: servicebinding.io/v1alpha3
     kind: ServiceBinding
     metadata:
-      name: #@ data.values.workload.metadata.name + "-liquibase-runner-" + service.name
+      name: #@ data.values.workload.metadata.name + "-liquibase-runner-" + service_claim.name
       annotations: #@ merge_annotations({"kapp.k14s.io/change-group": "servicebinding.io/ServiceBindings"})
       labels: #@ merge_labels({ "app.kubernetes.io/component": "db-migrations", "carto.run/workload-name": data.values.workload.metadata.name })
     spec:
-      name: #@ service.name
-      service: #@ service.ref
+      name: #@ service_claim.name
+      service: #@ service_claim.ref
       workload:
         apiVersion: batch/v1
         kind: Job
         name: #@ data.values.workload.metadata.name + "-liquibase-runner"
+    #@ end
     #@ end
     ---
     apiVersion: batch/v1
@@ -88,15 +90,17 @@ spec:
           - name: db-migrations
             image: liquibase/liquibase@sha256:402dd9d122a0ce1b5d6e165492c5d45d06694dc5be64c0d36fdb219f783d7551
             command: ["/bin/sh", "-c"]
+            #@yaml/text-templated-strings
             args:
             - |
               set -e
               cd `mktemp -d`
               cp /liquibase-config/* .
+              SERVICE_CLAIM="(@= param("db_migrations_service_claim_name") @)"
               echo "changeLogFile: ./db.changelog-master.yaml" >> ./liquibase.properties
-              echo "username: $(cat /bindings/db/username)" >> ./liquibase.properties
-              echo "password: $(cat /bindings/db/password)" >> ./liquibase.properties
-              echo "url: jdbc:$(cat /bindings/db/type)://$(cat /bindings/db/host):$(cat /bindings/db/port)/$(cat /bindings/db/database)" >> ./liquibase.properties
+              echo "username: $(cat /bindings/$SERVICE_CLAIM/username)" >> ./liquibase.properties
+              echo "password: $(cat /bindings/$SERVICE_CLAIM/password)" >> ./liquibase.properties
+              echo "url: jdbc:$(cat /bindings/$SERVICE_CLAIM/type)://$(cat /bindings/$SERVICE_CLAIM/host):$(cat /bindings/$SERVICE_CLAIM/port)/$(cat /bindings/$SERVICE_CLAIM/database)" >> ./liquibase.properties
               liquibase update --defaultsFile=$(pwd)/liquibase.properties
             volumeMounts:
               - name: liquibase-config
@@ -126,5 +130,6 @@ spec:
     metadata:
       name: #@ data.values.workload.metadata.name + "-with-liquibase-config"
       labels: #@ merge_labels({ "app.kubernetes.io/component": "liquibase-config" })
+    #@yaml/text-templated-strings
     data: #@ add_liquibase_config()
 
