@@ -1,0 +1,13 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: tap-demo-liquibase
+  description: Experimenting with TAP and db migrations
+  tags:
+    - tanzu
+  annotations:
+    'backstage.io/kubernetes-label-selector': 'app.kubernetes.io/part-of=tap-demo-liquibase'
+spec:
+  type: service
+  lifecycle: experimental
+  owner: default-team
