@@ -42,12 +42,12 @@ The custom supply chain will be activated if the workload contains the label `ap
 
 ## TODOs
 
-[x] Replace the initContainer strategy with a standalone Job that runs before the application is deployed
-[x] Specify a different service claim for running the db migrations (e.g. to simulate a different set of credentials for the db-migration job)
-[x] Replace the hardcoded bits used to for the db migrations to be parameters provided in the workload:
-    [x] database migrations path
-    [x] service-binding/claim name
-[ ] Generalise to support other schema migrations tools such as Flyway
+- [x] Replace the initContainer strategy with a standalone Job that runs before the application is deployed
+- [x] Specify a different service claim for running the db migrations (e.g. to simulate a different set of credentials for the db-migration job)
+- [x] Replace the hardcoded bits used to for the db migrations to be parameters provided in the workload:
+    - [x] database migrations path
+    - [x] service-binding/claim name
+- [ ] Generalise to support other schema migrations tools such as Flyway
 
 ## Caveats
 
