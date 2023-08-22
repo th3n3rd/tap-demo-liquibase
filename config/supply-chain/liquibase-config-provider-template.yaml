@@ -52,7 +52,7 @@ spec:
                 function encodeDirectoryContent() {
                   DIRECTORY=$(realpath $1)
                   find "$DIRECTORY" -type f | while read -r FILE; do
-                    KEY=$(dirname "$FILE")
+                    KEY=$(basename "$FILE")
                     echo "$KEY: |"
                     sed 's/^/    /' "$FILE"
                   done
