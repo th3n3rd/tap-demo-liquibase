@@ -51,6 +51,9 @@ spec:
     metadata:
       name: #@ data.values.workload.metadata.name + "-liquibase-config"
       labels: #@ merge_labels({ "app.kubernetes.io/component": "db-migrations", "carto.run/workload-name": data.values.workload.metadata.name })
+      annotations:
+        kapp.k14s.io/versioned: ""
+        kapp.k14s.io/num-versions: 2
     data: #@ db_migrations_data
     #@ for service_claim in data.values.workload.spec.serviceClaims:
     #@ if service_claim.name == param("db_migrations_service_claim_name"):
@@ -95,7 +98,7 @@ spec:
             - |
               set -e
               cd `mktemp -d`
-              cp /liquibase-config/* .
+              cp -r /liquibase-config/* .
               SERVICE_CLAIM="(@= param("db_migrations_service_claim_name") @)"
               echo "changeLogFile: ./db.changelog-master.yaml" >> ./liquibase.properties
               echo "username: $(cat /bindings/$SERVICE_CLAIM/username)" >> ./liquibase.properties
