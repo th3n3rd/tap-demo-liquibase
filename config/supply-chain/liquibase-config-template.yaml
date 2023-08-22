@@ -53,7 +53,7 @@ spec:
       labels: #@ merge_labels({ "app.kubernetes.io/component": "db-migrations", "carto.run/workload-name": data.values.workload.metadata.name })
       annotations:
         kapp.k14s.io/versioned: ""
-        kapp.k14s.io/num-versions: 2
+        kapp.k14s.io/num-versions: "2"
     data: #@ db_migrations_data
     #@ for service_claim in data.values.workload.spec.serviceClaims:
     #@ if service_claim.name == param("db_migrations_service_claim_name"):
