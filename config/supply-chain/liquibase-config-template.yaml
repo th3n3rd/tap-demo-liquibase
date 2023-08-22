@@ -54,6 +54,7 @@ spec:
       annotations:
         kapp.k14s.io/versioned: ""
         kapp.k14s.io/num-versions: "2"
+        kapp.k14s.io/versioned-keep-original: ""
     data: #@ db_migrations_data
     #@ for service_claim in data.values.workload.spec.serviceClaims:
     #@ if service_claim.name == param("db_migrations_service_claim_name"):
@@ -98,7 +99,7 @@ spec:
             - |
               set -e
               cd `mktemp -d`
-              cp -r /liquibase-config/* .
+              cp /liquibase-config/* .
               SERVICE_CLAIM="(@= param("db_migrations_service_claim_name") @)"
               echo "changeLogFile: ./db.changelog-master.yaml" >> ./liquibase.properties
               echo "username: $(cat /bindings/$SERVICE_CLAIM/username)" >> ./liquibase.properties
