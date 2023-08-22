@@ -1,4 +1,4 @@
 databaseChangeLog:
-  - include:
-      file: 1-greetings-table.sql
+  - includeAll:
+      path: ./migrations
       relativeToChangelogFile: true

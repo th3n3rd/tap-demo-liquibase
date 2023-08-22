@@ -28,7 +28,7 @@ spec:
     - name: gitops_ssh_secret
       value: tap-gitops-ssh-auth
     - name: db_migrations_path
-      value: ./src/main/resources/db/changelog/*
+      value: ./src/main/resources/db/changelog
     - name: db_migrations_service_claim_name
       value: db-migrations
   source:

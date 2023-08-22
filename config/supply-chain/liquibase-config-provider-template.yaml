@@ -42,19 +42,25 @@ spec:
             - name: workload-name
             - name: db-migrations-path
           steps:
-            - name: serialise-db-migrations
+            - name: encoding-db-migrations
               image: ghcr.io/vmware-tanzu/carvel-docker-image@sha256:5ab82a2ac0b983f5967b5ffc7d3503b4741ac808cd2c1cc6b4a42916f7ed1a47
               script: |
                 #!/usr/bin/env bash
+    
+                set -e
+                
+                function encodeDirectoryContent() {
+                  DIRECTORY=$(realpath $1)
+                  find "$DIRECTORY" -type f | while read -r FILE; do
+                    KEY=$(echo "$FILE" | sed "s|^$DIRECTORY/||")
+                    echo "$KEY: |"
+                    sed 's/^/    /' "$FILE"
+                  done
+                }
+                
                 cd `mktemp -d`
                 wget -qO- $(params.source-url) | tar xvz -m
-                touch plain-config.yaml
-                for file in $(params.db-migrations-path)
-                do
-                  echo "`basename $file`: |" >> plain-config.yaml
-                  sed 's/^/    /' "$file" >> plain-config.yaml
-                done
-                cat plain-config.yaml | base64 > $(results.liquibase-config-base64.path)
+                encodeDirectoryContent "$(params.db-migrations-path)" | base64 > $(results.liquibase-config-base64.path)
           results:
             - name: liquibase-config-base64
               description: base64-encoded YAML describing the liquibase database migrations
