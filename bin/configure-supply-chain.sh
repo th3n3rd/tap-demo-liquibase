@@ -12,8 +12,6 @@ REGISTRY_SERVER=$(echo "$TAP_VALES" | yq -r '.ootb_supply_chain_basic.registry.s
 
 info "Configuring 'source-db-migrations-to-url' supply chain"
 kubectl apply -f "$SCRIPT_DIR/../config/supply-chain/deliverable-jobs-rbac.yaml"
-kubectl apply -f "$SCRIPT_DIR/../config/supply-chain/tekton-results-taskrun.yaml"
-kubectl apply -f "$SCRIPT_DIR/../config/supply-chain/liquibase-config-provider-task.yaml"
 kubectl apply -f "$SCRIPT_DIR/../config/supply-chain/liquibase-config-provider-template.yaml"
 kubectl apply -f "$SCRIPT_DIR/../config/supply-chain/liquibase-config-template.yaml"
 kubectl apply -f "$SCRIPT_DIR/../config/supply-chain/enhanced-web-config-template.yaml"

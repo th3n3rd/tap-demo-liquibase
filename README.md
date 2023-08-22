@@ -26,7 +26,7 @@ changes:
     * This new `ClusterConfigTemplate` is a copy of the `config-template` and it just adds an `kapp` annotation ot he Knative service created
       so to ensure we can apply a certain order to the manifest applied by `kapp` at delivery time.
 * A new step named `db-migrations-provider`, configured to use a new template `liquibase-config-provider-template`
-    * It leverages a tekton `ClusterTask`, namely `liquibase-config-provider-task`, in order to encode the database migrations from the source code into YAML
+    * It leverages a tekton `TaskRun` in order to encode the database migrations from the source code into YAML
 * A new step name `db-migrations`, configured to use a new template `liquibase-config-template`
     * It receives the config from the `api-descriptors` step and append a new entry containing few resources:
         * a `ConfigMap` of all the database migrations received by the `db-migration-provider` step
@@ -35,8 +35,6 @@ changes:
             * A service binding exists with the name `db`, containing the credentials to access the database with the ability to execute DDLs
             * A config map exists with the name `<workload-name>-liquibase-config`, containing the migration changelog and database migrations to apply
     * The output of this template is then used by the `config-provider` step in order to generate the GitOps configuration to apply at delivery time.
-
-In order to support data flowing from Tekton to the Supply Chain, we created a reusable `ClusterRunTemplate`, namely `tekton-results-taskrun`, which can be used by any `Runnable` in order to to expose any results coming from a tekton `Task`.
 
 The custom supply chain will be activated if the workload contains the label `apps.tanzu.vmware.com/has-db-migrations: "true"`.
 
@@ -47,6 +45,8 @@ The custom supply chain will be activated if the workload contains the label `ap
 - [x] Replace the hardcoded bits used to for the db migrations to be parameters provided in the workload:
     - [x] database migrations path
     - [x] service-binding/claim name
+- [x] Simplify supply chain where possible
+    - [x] For the `liquibase-config-provider` replace the combination of `Runnable` + `ClusterRunTemplate` + `ClusterTask` with a single `TaskRun` with inline specs
 - [ ] Generalise to support other schema migrations tools such as Flyway
 
 ## Caveats
