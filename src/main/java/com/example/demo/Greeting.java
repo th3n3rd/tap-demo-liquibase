@@ -11,4 +11,6 @@ class Greeting {
     private Long id;
 
     private String message;
+
+    private String language;
 }
