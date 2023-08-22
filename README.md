@@ -32,11 +32,19 @@ changes:
         * a `ConfigMap` of all the database migrations received by the `db-migration-provider` step
         * one or more `ServiceBinding` (starting from the serviceClaims applied to the workload, for now)
         * a `Job` that will run the database migration ar runtime, with the following assumptions:
-            * A service binding exists with the name `db`, containing the credentials to access the database with the ability to execute DDLs
             * A config map exists with the name `<workload-name>-liquibase-config`, containing the migration changelog and database migrations to apply
     * The output of this template is then used by the `config-provider` step in order to generate the GitOps configuration to apply at delivery time.
 
 The custom supply chain will be activated if the workload contains the label `apps.tanzu.vmware.com/has-db-migrations: "true"`.
+
+The workload will have to specify the following parameters:
+
+```yaml
+- name: db_migrations_path
+  value: <path-to-database-migrations>
+- name: db_migrations_service_claim_name
+  value: <service-claim-name-for-db-connection>
+```
 
 ## TODOs
 
@@ -50,6 +58,25 @@ The custom supply chain will be activated if the workload contains the label `ap
 - [ ] Generalise to support other schema migrations tools such as Flyway
 
 ## Caveats
+
+It's important to notice that at this time this proof-of-concept supports only a specific liquibase scaffolding structure,
+specifically one that has the master changelog together with the other changelogs in the same folder.
+
+This is due to a limitation of ConfigMaps in k8s, whereby they don't support a nested structure.
+
+A better solution would probably be to have a completely separate application (same repo though) that is responsible for applying database migrations.
+
+This will have several advantages:
+
+* Would get rid of any technical limitation on the size, the db migrations would be part of the container image of the dedicated application
+* Would decouple the implementation details of the tooling used providing higher flexibility
+
+But also have disadvantages:
+
+* Probably would need a separate supply chain to build the application
+* Would need to find a way to couple applications provided by different supply chains (prob not possible)
+
+---
 
 A single `ConfigmMap` has a size limit of `1MB`, which does include the whole resource definition and is not limited to the data field.
 Currently the `ConfigMap` passed through the SupplyChain is already used to carry resource definitions for the Knative serving, service bindings and api descriptors.
